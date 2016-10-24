@@ -7,7 +7,7 @@ before_install:
   - go get github.com/mitchellh/gox
   - go get github.com/tcnksm/ghr
   - go get github.com/Masterminds/glide
-  - glide install
+install: glide install
 script:
   - gox -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
 #  - ghr --username $GITHUB_TOKEN --token $GITHUB_TOKEN --replace --prerelease --debug pre-release dist
