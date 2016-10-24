@@ -1,6 +1,6 @@
 # vgm-env-wrapper
 
-Wrapper for [VGM](https://github.com/ChannelMeter/vault-gatekeeper-mesos) secrets in Mararthon. It translates environment variables values to data fetched from vault.
+Wrapper for [VGM](https://github.com/ChannelMeter/vault-gatekeeper-mesos) secrets in Mararthon. It replaces environment variables values with the data fetched from vault.
 
 ## Usage
 
