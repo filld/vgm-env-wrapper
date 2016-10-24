@@ -132,12 +132,4 @@ func main() {
 	if err = syscall.Exec(name, os.Args[1:], os.Environ()); err != nil {
 		log.Fatalf("error: exec failed: %v", err)
 	}
-
-	log.Println("Done... Cleaning up")
-
-	for _, mapping := range mapping {
-		if mapping.File != nil {
-			os.Remove(mapping.File.Name())
-		}
-	}
 }
