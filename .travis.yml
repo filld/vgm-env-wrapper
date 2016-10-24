@@ -1,13 +1,20 @@
 language: go
 go:
-  - 1.7
+- 1.7
 env:
-  - "PATH=/home/travis/gopath/bin:$PATH"
+- PATH=/home/travis/gopath/bin:$PATH
 before_install:
-  - go get github.com/mitchellh/gox
-  - go get github.com/tcnksm/ghr
-  - go get github.com/Masterminds/glide
+- go get github.com/mitchellh/gox
+- go get github.com/Masterminds/glide
 install: glide install
 script:
-  - gox -osarch="linux/amd64" -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}"
-  - ghr --username glebpom --token $GITHUB_TOKEN v0.1.0 dist
+- gox -osarch="linux/amd64" -output "dist/{{.Dir}}"
+deploy:
+  provider: releases
+  api_key:
+    secure: YngnO+Lm97K57KXipgYMvZ8TcB3OqsiCIh1bNHuaznBbkAmIXMZI4n9/c3dVx41gE30MSy2AfB4glOpsiCIom90PT3ilWzCt3X9LaKlyoiQeeaSUsPiEjd7cLsQzE5T8YZpnGdrA4wHB2JsOq/00bnSagWsbDAXEZiE4y1gfs0Wnz0XONHx10uD9YprEO57rPzAfFmmKLq370KDjea04OHMjYXFULW5aEe3yXE6yjA/P7vD0XQe/tPlkopHj5Ryd4A5Uc6VpKdEoMvLJqQcRgT2A8ZkqJZwM/vSPoWL+i5RDC+0gJTD+GShjfAw/vwYlbgFeJQd39R2r9heFUJPv2tmCbZIBTpY+V0ehx3ozIMHXXPkNhtORr4qPXkeHATM9ze8Cb1Kx5WmDm0uSC7+BDX5YjmTifYiiEAOU1CVpC4wwdWkn/kmzvSRM/tJPfRYYLRCidSwqVo4bH/zhPQX3/Ucxo6t96towlvrGjv+WGO/cQq9FhTfKbInoegbI1Vl2wv0A8Syzj6fkLKSElQ1D87SWBcuEDq4ZsVUIEGswzRWzTddoQiDUtNDbz+2sqwXFSOJgdNnlb3DjOGUHcB02zn994+qY5jOwydcobWtMdqEbtA06IvDJtQarV55pkLxGK13n8os5zBdu5jbyVk1TOP/iD0uB5bm1ghY3aTvlpng=
+  file: dist/vgm-env-wrapper
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: glebpom/vgm-env-wrapper
