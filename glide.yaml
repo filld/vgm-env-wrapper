@@ -1,0 +1,6 @@
+package: github.com/glebpom/vgm-env-wrapper
+import:
+- package: github.com/channelmeter/vault-gatekeeper-mesos
+  subpackages:
+  - gatekeeper
+- package: github.com/Jeffail/gabs

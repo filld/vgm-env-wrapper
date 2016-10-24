@@ -1,0 +1,10 @@
+hash: f607794dd8780a3ad29195a706a88c47e39929a9538fe76cd8effca9315b4a35
+updated: 2016-10-24T18:31:14.8125654+03:00
+imports:
+- name: github.com/channelmeter/vault-gatekeeper-mesos
+  version: 65687a3746cad53f0039ac039fff15c579c3f8bb
+  subpackages:
+  - gatekeeper
+- name: github.com/Jeffail/gabs
+  version: 855034b6b7a3b7144977efcaefe72d2c64b0d039
+devImports: []
