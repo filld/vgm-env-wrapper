@@ -58,7 +58,7 @@ func getSecret(c *gatekeeper.Client, token string, vaultPath string, vaultKey st
 	return value, nil
 }
 
-const Version = "0.1.0"
+const Version = "0.2.0"
 
 func main() {
 	log.SetFlags(0) // no timestamps on our logs
@@ -72,55 +72,58 @@ func main() {
 		os.Exit(1)
 	}
 
-	var env []string
-	env = os.Environ()
+	enabled := os.Getenv("VGM_ENV_ENABLED")
+	if len(enabled) > 0 {
+		var env []string
+		env = os.Environ()
 
-	var mapping []EnvMap;
+		var mapping []EnvMap;
 
-	for _, value := range env {
-		name := strings.Split(value, "=")
-		v := name[0]
-		parts := strings.Split(name[1], ":")
-		if len(parts) == 3 && len(parts[1]) > 0 && len(parts[2]) > 0 {
-			if parts[0] == "vgm" {
-				mapping = append(mapping,
-					EnvMap{
-						VaultPath:parts[1],
-						VaultKey: parts[2],
-						EnvVar: v,
-					});
-			}
-			if parts[0] == "vgm_file" {
-				tmpfile, err := ioutil.TempFile("", "vgm")
-				if err != nil {
-					log.Fatal("Failed to save temp file: " + err.Error())
+		for _, value := range env {
+			name := strings.Split(value, "=")
+			v := name[0]
+			parts := strings.Split(name[1], ":")
+			if len(parts) == 3 && len(parts[1]) > 0 && len(parts[2]) > 0 {
+				if parts[0] == "vgm" {
+					mapping = append(mapping,
+						EnvMap{
+							VaultPath:parts[1],
+							VaultKey: parts[2],
+							EnvVar: v,
+						});
 				}
-				mapping = append(mapping,
-					EnvMap{
-						VaultPath:parts[1],
-						VaultKey: parts[2],
-						EnvVar: v,
-						File: tmpfile,
-					});
+				if parts[0] == "vgm_file" {
+					tmpfile, err := ioutil.TempFile("", "vgm")
+					if err != nil {
+						log.Fatal("Failed to save temp file: " + err.Error())
+					}
+					mapping = append(mapping,
+						EnvMap{
+							VaultPath:parts[1],
+							VaultKey: parts[2],
+							EnvVar: v,
+							File: tmpfile,
+						});
+				}
 			}
 		}
-	}
-	token, err := gatekeeper.EnvRequestVaultToken()
-	if err != nil {
-		log.Fatal("Could not get vault token: " + err.Error());
-	}
-	for _, mapping := range mapping {
-		secret, err := getSecret(gatekeeper.DefaultClient, token, mapping.VaultPath, mapping.VaultKey)
+		token, err := gatekeeper.EnvRequestVaultToken()
 		if err != nil {
-			log.Fatal("Could not get secret for " + mapping.EnvVar + " : " + err.Error());
+			log.Fatal("Could not get vault token: " + err.Error());
 		}
-		if mapping.File != nil {
-			if _, err := mapping.File.Write([]byte(secret)); err != nil {
-				log.Fatal(err)
+		for _, mapping := range mapping {
+			secret, err := getSecret(gatekeeper.DefaultClient, token, mapping.VaultPath, mapping.VaultKey)
+			if err != nil {
+				log.Fatal("Could not get secret for " + mapping.EnvVar + " : " + err.Error());
 			}
-			os.Setenv(mapping.EnvVar, mapping.File.Name());
-		} else {
-			os.Setenv(mapping.EnvVar, secret);
+			if mapping.File != nil {
+				if _, err := mapping.File.Write([]byte(secret)); err != nil {
+					log.Fatal(err)
+				}
+				os.Setenv(mapping.EnvVar, mapping.File.Name());
+			} else {
+				os.Setenv(mapping.EnvVar, secret);
+			}
 		}
 	}
 

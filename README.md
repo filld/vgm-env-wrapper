@@ -8,7 +8,10 @@ Set environment variables:
 ```
 VAULT_ADDR=http://localhost:8200
 GATEKEEPER_ADDR=http://localhost:9201
+VGM_ENV_ENABLED=1
 ```
+
+if `VGM_ENV_ENABLED` is not set, `vgm-env-wrapper` will not do anything with environment variables.
 
 When you run it under Mesos/Marathon `MESOS_TOKEN` variable will contain Mesos task ID. It will be automatically used to fetch
 token from VGM.
