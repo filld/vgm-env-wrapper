@@ -114,15 +114,17 @@ func main() {
 		for _, mapping := range mapping {
 			secret, err := getSecret(gatekeeper.DefaultClient, token, mapping.VaultPath, mapping.VaultKey)
 			if err != nil {
-				log.Fatal("Could not get secret for " + mapping.EnvVar + " : " + err.Error());
+				log.Fatal("Failed to replace " + mapping.EnvVar + ": " + err.Error())
 			}
 			if mapping.File != nil {
 				if _, err := mapping.File.Write([]byte(secret)); err != nil {
-					log.Fatal(err)
+					log.Fatal("Failed to replace " + mapping.EnvVar + ": " + err.Error())
 				}
 				os.Setenv(mapping.EnvVar, mapping.File.Name());
+				log.Println("Replacing " + mapping.EnvVar + " with the path to tempfile containing vault secret " + mapping.VaultPath + " | " + mapping.VaultKey);
 			} else {
 				os.Setenv(mapping.EnvVar, secret);
+				log.Println("Replacing " + mapping.EnvVar + " with the vault secret " + mapping.VaultPath + " | " + mapping.VaultKey);
 			}
 		}
 	}
