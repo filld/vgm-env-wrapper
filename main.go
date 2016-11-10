@@ -1,19 +1,19 @@
 package main
 
 import (
+	"errors"
+	"github.com/Jeffail/gabs"
 	"github.com/channelmeter/vault-gatekeeper-mesos/gatekeeper"
-	"os"
-	"os/exec"
-	"strings"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
-	"github.com/Jeffail/gabs"
-	"io/ioutil"
-	"errors"
-	"log"
-	"syscall"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"syscall"
 )
 
 type EnvMap struct {
@@ -58,7 +58,7 @@ func getSecret(c *gatekeeper.Client, token string, vaultPath string, vaultKey st
 	return value, nil
 }
 
-const Version = "0.2.0"
+const Version = "0.2.2"
 
 func main() {
 	log.SetFlags(0) // no timestamps on our logs
@@ -77,7 +77,7 @@ func main() {
 		var env []string
 		env = os.Environ()
 
-		var mapping []EnvMap;
+		var mapping []EnvMap
 
 		for _, value := range env {
 			name := strings.Split(value, "=")
@@ -87,10 +87,10 @@ func main() {
 				if parts[0] == "vgm" {
 					mapping = append(mapping,
 						EnvMap{
-							VaultPath:parts[1],
-							VaultKey: parts[2],
-							EnvVar: v,
-						});
+							VaultPath: parts[1],
+							VaultKey:  parts[2],
+							EnvVar:    v,
+						})
 				}
 				if parts[0] == "vgm_file" {
 					tmpfile, err := ioutil.TempFile("", "vgm")
@@ -99,19 +99,21 @@ func main() {
 					}
 					mapping = append(mapping,
 						EnvMap{
-							VaultPath:parts[1],
-							VaultKey: parts[2],
-							EnvVar: v,
-							File: tmpfile,
-						});
+							VaultPath: parts[1],
+							VaultKey:  parts[2],
+							EnvVar:    v,
+							File:      tmpfile,
+						})
 				}
 			}
 		}
+		log.Println("Requesting vault token...")
 		token, err := gatekeeper.EnvRequestVaultToken()
 		if err != nil {
-			log.Fatal("Could not get vault token: " + err.Error());
+			log.Fatal("Could not get vault token: " + err.Error())
 		}
 		for _, mapping := range mapping {
+			log.Println("Fetching vault token for " + mapping.VaultPath + " | " + mapping.VaultKey)
 			secret, err := getSecret(gatekeeper.DefaultClient, token, mapping.VaultPath, mapping.VaultKey)
 			if err != nil {
 				log.Fatal("Failed to replace " + mapping.EnvVar + ": " + err.Error())
@@ -120,11 +122,11 @@ func main() {
 				if _, err := mapping.File.Write([]byte(secret)); err != nil {
 					log.Fatal("Failed to replace " + mapping.EnvVar + ": " + err.Error())
 				}
-				os.Setenv(mapping.EnvVar, mapping.File.Name());
-				log.Println("Replacing " + mapping.EnvVar + " with the path to tempfile containing vault secret " + mapping.VaultPath + " | " + mapping.VaultKey);
+				os.Setenv(mapping.EnvVar, mapping.File.Name())
+				log.Println("Replacing " + mapping.EnvVar + " with the path to tempfile containing vault secret " + mapping.VaultPath + " | " + mapping.VaultKey)
 			} else {
-				os.Setenv(mapping.EnvVar, secret);
-				log.Println("Replacing " + mapping.EnvVar + " with the vault secret " + mapping.VaultPath + " | " + mapping.VaultKey);
+				os.Setenv(mapping.EnvVar, secret)
+				log.Println("Replacing " + mapping.EnvVar + " with the vault secret " + mapping.VaultPath + " | " + mapping.VaultKey)
 			}
 		}
 	}
