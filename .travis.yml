@@ -3,12 +3,13 @@ go:
 - 1.7
 env:
 - PATH=/home/travis/gopath/bin:$PATH
+- CGO_ENABLED=0
 before_install:
 - go get github.com/mitchellh/gox
 - go get github.com/Masterminds/glide
 install: glide install
 script:
-- gox -osarch="linux/amd64" -output "dist/{{.Dir}}"
+- gox -osarch="linux/amd64" -tags netgo -output "dist/{{.Dir}}"
 deploy:
   provider: releases
   api_key:

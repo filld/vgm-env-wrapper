@@ -58,7 +58,7 @@ func getSecret(c *gatekeeper.Client, token string, vaultPath string, vaultKey st
 	return value, nil
 }
 
-const Version = "0.2.2"
+const Version = "0.2.3"
 
 func main() {
 	log.SetFlags(0) // no timestamps on our logs
